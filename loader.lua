@@ -68,13 +68,35 @@ end
 
 -- Mode selection functions
 local function onPvpSelected()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/refs/heads/main/BRM5-PVP.lua"))()
+    -- Deshabilitar botones inmediatamente
+    pvpButton.AutoButtonColor = false
+    pveButton.AutoButtonColor = false
+    pvpButton.Text = "Loading..."
+    pveButton.Text = "Please wait..."
+
+    -- Destruir GUI antes de cargar el script
     screenGui:Destroy()
+
+    -- Ejecutar script en segundo plano
+    task.spawn(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/refs/heads/main/BRM5-PVP.lua"))()
+    end)
 end
 
 local function onPveSelected()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/refs/heads/main/BRM5-PVE.lua"))()
+    -- Deshabilitar botones inmediatamente
+    pvpButton.AutoButtonColor = false
+    pveButton.AutoButtonColor = false
+    pvpButton.Text = "Please wait..."
+    pveButton.Text = "Loading..."
+
+    -- Destruir GUI antes de cargar el script
     screenGui:Destroy()
+
+    -- Ejecutar script en segundo plano
+    task.spawn(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/refs/heads/main/BRM5-PVE.lua"))()
+    end)
 end
 
 -- Connect buttons
