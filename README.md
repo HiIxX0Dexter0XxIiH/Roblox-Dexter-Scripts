@@ -33,10 +33,6 @@ This mode is designed for Player vs. Player combat scenarios.
 * 💾 Save and Load Configuration
 * 🎨 Enhanced GUI (Draggable, Toggleable with 'Insert' key)
 
-### 🚀 Future PVP Enhancements:
-
-* 
-
 ---
 
 ## 🤖 PVE Mode Features 🤖
@@ -51,5 +47,9 @@ This mode is tailored for Player vs. Environment gameplay.
 * 🔫 All Firemodes
 
 ---
+
+### 🚀 Future Enhancements:
+
+*  🧟‍♂️Zombie Mode and others
 
 Enjoy and play smart! Remember the risks.
