@@ -35,7 +35,7 @@ This mode is designed for Player vs. Player combat scenarios.
 
 ### 🚀 Future PVP Enhancements:
 
-* 🔫 Integrated Recoil Compensation (Adjustable)
+* 
 
 ---
 
@@ -47,6 +47,8 @@ This mode is tailored for Player vs. Environment gameplay.
 
 * 👁️‍🗨️ WallHack
 * 🤫 Silent Aim
+* 🚫 Anti Recoil
+* 🔫 All Firemodes
 
 ---
 
