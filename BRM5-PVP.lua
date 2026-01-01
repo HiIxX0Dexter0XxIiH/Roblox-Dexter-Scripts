@@ -1,5 +1,5 @@
 -- BRM5 v4 Wall + AIM PVP GUI by dexter 
--- Credits to ryknuq and their overvoltage script, which helped me understand how to integrate the aimbot into my script. Without their script, I don't think I could have done this.
+-- Credits to ryknuq and their overvoltage script, which helped me understand how to integrate the Aim into my script. Without their script, I don't think I could have done this.
 
 -- Obtaining essential Roblox services
 local Players = game:GetService("Players")
@@ -16,19 +16,19 @@ local configFile = "Dexter_Config.txt" -- Configuration file name
 -- Constants for target detection
 local TARGET_NAME = "Male" -- Name of the target NPC model
 local TARGET_PART = "Head" -- NPC body part to aim at
-local REQUIRED_CHILD = "Wall_Box" -- Name of the required child object to identify valid targets for the aimbot
-local DEADZONE = 1.5 -- Deadzone for the aimbot, to avoid jerky movements with small deltas
+local REQUIRED_CHILD = "Wall_Box" -- Name of the required child object to identify valid targets for the Aim
+local DEADZONE = 1.5 -- Deadzone for the Aim, to avoid jerky movements with small deltas
 
 -- Tables and state variables
-local trackedParts = {} -- Stores NPC parts that are being tracked (for wallhack)
-local wallConnections = {} -- Stores event connections for wallhack
-local wallEnabled = false -- Wallhack state (on/off)
+local trackedParts = {} -- Stores NPC parts that are being tracked (for Wall)
+local wallConnections = {} -- Stores event connections for Wall
+local wallEnabled = false -- Wall state (on/off)
 local guiVisible = true -- GUI visibility state
 local isUnloaded = false -- Indicates if the script has been unloaded/disabled
 
--- Aimbot configuration variables
-local aimEnabled = false -- Aimbot state (on/off)
-local smoothing = 95 -- Aimbot smoothing level (0-100, higher = smoother)
+-- configuration variables
+local aimEnabled = false -- Aim state (on/off)
+local smoothing = 95 -- Aim smoothing level (0-100, higher = smoother)
 local holdingRightClick = false -- Indicates if the player is holding down the right mouse button
 local fovEnabled = false -- FOV (field of view) circle state (on/off)
 local fovRadius = 100 -- FOV circle radius in pixels
@@ -87,7 +87,7 @@ fovEnabled = currentConfig.fovEnabled
 fovRadius = currentConfig.fovRadius
 smoothing = currentConfig.smoothing
 
--- Function to destroy all wallhack boxes
+-- Function to destroy all Wall boxes
 local function destroyAllBoxes()
     for part, _ in pairs(trackedParts) do
         if part and part.Parent and part:FindFirstChild("Wall_Box") then
@@ -97,13 +97,12 @@ local function destroyAllBoxes()
     trackedParts = {} -- Empties the tracked parts table
 end
 
--- Function to create a wallhack box for a specific part
 local function createBoxForPart(part)
     if isUnloaded or not part or part.Parent == nil or part:FindFirstChild("Wall_Box") then return end -- Conditions for not creating the box
     task.wait(0.5) -- Short wait to ensure the part is fully loaded
     if not part or not part.Parent or part:FindFirstChild("Wall_Box") then return end -- Double check
 
-    local box = Instance.new("BoxHandleAdornment") -- Creates the visual object for the wallhack
+    local box = Instance.new("BoxHandleAdornment") -- Creates the visual object for the Wall
     box.Name = "Wall_Box" -- Object name
     box.Size = part.Size + Vector3.new(0.1, 0.1, 0.1) -- Size slightly larger than the part
     box.Adornee = part -- Associates the box with the NPC part
@@ -167,22 +166,22 @@ end
 -- Creation of the GUI title
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1, 0, 0, 30)
-title.Text = "🎯 BRM5 BRM5 v4 - by Dexter"
+title.Text = "🎯 BRM5 v4 - by Dexter"
 title.TextColor3 = Color3.new(1, 1, 1)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 title.BackgroundTransparency = 1 -- Transparent background
 
--- Creation of the button to enable/disable Wallhack
+-- Creation of the button to enable/disable Wall
 local wallBtn = createButton(wallEnabled and "Wall: ON" or "Wall: OFF", 40, Color3.fromRGB(60, 60, 60))
 wallBtn.MouseButton1Click:Connect(function() -- Event on button click
-    wallEnabled = not wallEnabled -- Toggles the wallhack state
+    wallEnabled = not wallEnabled -- Toggles the Wall state
     currentConfig.wall = wallEnabled -- Updates the configuration
     saveConfig(currentConfig) -- Saves the configuration
     wallBtn.Text = "Wall: " .. (wallEnabled and "ON" or "OFF") -- Updates the button text
     wallBtn.BackgroundColor3 = wallEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(60, 60, 60) -- Changes the button color
 
-    -- Updates the transparency of existing boxes based on wallhack state
+    -- Updates the transparency of existing boxes based on Wall state
     for part, _ in pairs(trackedParts) do
         local box = part:FindFirstChild("Wall_Box")
         if box and box:IsA("BoxHandleAdornment") then
@@ -206,10 +205,10 @@ UserInputService.InputBegan:Connect(function(input, processed)
     end
 end)
 
--- Creation of the button to enable/disable Aimbot
+-- Creation of the button to enable/disable Aim
 local aimBtn = createButton("Aim: OFF", 80, Color3.fromRGB(60, 60, 60))
 aimBtn.MouseButton1Click:Connect(function()
-    aimEnabled = not aimEnabled -- Toggles the aimbot state
+    aimEnabled = not aimEnabled -- Toggles the Aim state
     aimBtn.Text = "Aim: " .. (aimEnabled and "ON" or "OFF") -- Updates the text
     aimBtn.BackgroundColor3 = aimEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(60, 60, 60) -- Changes the color
     currentConfig.aim = aimEnabled -- Updates the configuration
@@ -230,7 +229,7 @@ end)
 local unloadBtn = createButton("Unload", 160, Color3.fromRGB(170, 0, 0)) -- Red color to indicate destructive action
 unloadBtn.MouseButton1Click:Connect(function()
     isUnloaded = true -- Marks the script as unloaded
-    destroyAllBoxes() -- Destroys all wallhack boxes
+    destroyAllBoxes() -- Destroys all Wall boxes
     fovCircle:Remove() -- Removes the FOV circle
     gui:Destroy() -- Destroys the GUI
     for _, conn in ipairs(wallConnections) do pcall(function() conn:Disconnect() end) end -- Disconnects all event connections
@@ -300,7 +299,7 @@ createSlider("FOV Radius", 1, 500, fovRadius, 200, function(value)
     saveConfig(currentConfig) -- Saves the configuration
 end)
 
--- Creation of the slider for Aimbot Smoothing
+-- Creation of the slider for Aim Smoothing
 createSlider("Smoothing", 0, 100, smoothing, 260, function(value)
     smoothing = value -- Updates the global smoothing variable
     currentConfig.smoothing = value -- Updates the configuration
@@ -324,7 +323,7 @@ instructionNote.TextXAlignment = Enum.TextXAlignment.Left
 instructionNote.TextYAlignment = Enum.TextYAlignment.Top
 instructionNote.Text = instructionTextContent -- Assigns the instruction text
 
--- Events to detect if the right mouse button is held down (for aimbot)
+-- Events to detect if the right mouse button is held down (for Aim)
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then holdingRightClick = true end
 end)
@@ -380,9 +379,9 @@ end
 
 -- Initialization when loading the script
 registerExistingNPCs() -- Registers NPCs that already exist in the game
-if wallEnabled then -- If wallhack is enabled by configuration
+if wallEnabled then -- If Wall is enabled by configuration
     createBoxesForAllNPCs() -- Creates boxes for NPCs
-    -- Ensures all tracked NPCs have a box if wallhack is active
+    -- Ensures all tracked NPCs have a box if Wall is active
     for part, _ in pairs(trackedParts) do
         if part and part.Parent and not part:FindFirstChild("Wall_Box") then
             createBoxForPart(part)
@@ -397,7 +396,7 @@ table.insert(wallConnections, Workspace.ChildAdded:Connect(function(child)
         local head = child:FindFirstChild(TARGET_PART) -- Looks for the head
         if head then
             trackedParts[head] = true -- Adds to the tracked list
-            if wallEnabled then createBoxForPart(head) end -- Creates the box if wallhack is active
+            if wallEnabled then createBoxForPart(head) end -- Creates the box if Wall is active
         end
     end
 end))
@@ -407,7 +406,6 @@ local mainRenderLoop -- Renamed 'loop' to 'mainRenderLoop' for the first loop fo
 mainRenderLoop = RunService.RenderStepped:Connect(function()
     if isUnloaded then return end -- If the script is unloaded, do nothing
 
-    -- Wallhack logic: update color and visibility of boxes
     for part, _ in pairs(trackedParts) do
         if part and part.Parent and part:FindFirstChild("Wall_Box") then
             local box = part.Wall_Box
@@ -429,10 +427,10 @@ mainRenderLoop = RunService.RenderStepped:Connect(function()
     local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
     fovCircle.Position = screenCenter
     fovCircle.Radius = fovRadius
-    fovCircle.Visible = fovEnabled and aimEnabled -- Visible only if FOV and Aimbot are enabled
+    fovCircle.Visible = fovEnabled and aimEnabled -- Visible only if FOV and Aim are enabled
 
-    -- Aimbot logic
-    if aimEnabled and holdingRightClick then -- If aimbot is enabled and right-click is held
+    -- Aim logic
+    if aimEnabled and holdingRightClick then -- If Aim is enabled and right-click is held
         local target = getClosestValidHead() -- Gets the closest valid target
         if target then aimAtTarget(target) end -- If there's a target, aim at it
     end
