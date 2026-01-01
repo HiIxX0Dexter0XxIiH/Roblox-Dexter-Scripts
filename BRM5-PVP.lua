@@ -1,4 +1,4 @@
--- BRM5 v4 Wall + AIM PVP GUI by dexter 
+-- BRM5 v6.5 by dexter 
 -- Credits to ryknuq and their overvoltage script, which helped me understand how to integrate the Aim into my script. Without their script, I don't think I could have done this.
 
 -- Obtaining essential Roblox services
@@ -236,6 +236,51 @@ unloadBtn.MouseButton1Click:Connect(function()
     if mainRenderLoop then mainRenderLoop:Disconnect() end -- Disconnects the main RenderStepped loop (using 'mainRenderLoop' for the first loop)
 end)
 
+-- Botón de No Recoil (Anti-recoil)
+local noRecoilBtn = createButton("No Recoil: OFF", 200, Color3.fromRGB(60, 60, 60))
+local noRecoilEnabled = false
+
+noRecoilBtn.MouseButton1Click:Connect(function()
+    noRecoilEnabled = not noRecoilEnabled
+    noRecoilBtn.Text = "No Recoil: " .. (noRecoilEnabled and "ON" or "OFF")
+    noRecoilBtn.BackgroundColor3 = noRecoilEnabled and Color3.fromRGB(0, 170, 255) or Color3.fromRGB(60, 60, 60)
+
+    -- Código que elimina el retroceso si está activado
+    local weaponsFolder = game:GetService("ReplicatedStorage"):FindFirstChild("Shared")
+        and game:GetService("ReplicatedStorage").Shared:FindFirstChild("Configs")
+        and game:GetService("ReplicatedStorage").Shared.Configs:FindFirstChild("Weapon")
+        and game:GetService("ReplicatedStorage").Shared.Configs.Weapon:FindFirstChild("Weapons_Player")
+
+    if weaponsFolder then
+        for _, platform in pairs(weaponsFolder:GetChildren()) do
+            if platform.Name:match("^Platform_") then
+                for _, weapon in pairs(platform:GetChildren()) do
+                    for _, child in pairs(weapon:GetChildren()) do
+                        if child:IsA("ModuleScript") and child.Name:match("^Receiver%.") then
+                            local success, receiver = pcall(require, child)
+                            if success and receiver and receiver.Config and receiver.Config.Tune then
+                                local tune = receiver.Config.Tune
+                                if noRecoilEnabled then
+                                    tune.Recoil_X = 0
+                                    tune.Recoil_Z = 0
+                                    tune.RecoilForce_Tap = 0
+                                    tune.RecoilForce_Impulse = 0
+                                    tune.Recoil_Range = Vector2.zero
+                                    tune.Recoil_Camera = 0
+                                    tune.RecoilAccelDamp_Crouch = Vector3.new(1, 1, 1)
+                                    tune.RecoilAccelDamp_Prone = Vector3.new(1, 1, 1)
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+
+
 -- Function to create a slider control in the GUI
 local function createSlider(labelText, min, max, defaultValue, positionY, callback) -- Renamed 'default' to 'defaultValue'
     -- Slider label
@@ -293,14 +338,14 @@ local function createSlider(labelText, min, max, defaultValue, positionY, callba
 end
 
 -- Creation of the slider for FOV Radius
-createSlider("FOV Radius", 1, 500, fovRadius, 200, function(value)
+createSlider("FOV Radius", 0, 500, fovRadius, 240, function(value)
     fovRadius = value -- Updates the global radius variable
     currentConfig.fovRadius = value -- Updates the configuration
     saveConfig(currentConfig) -- Saves the configuration
 end)
 
 -- Creation of the slider for Aim Smoothing
-createSlider("Smoothing", 0, 100, smoothing, 260, function(value)
+createSlider("Smoothing", 0, 100, smoothing, 300, function(value)
     smoothing = value -- Updates the global smoothing variable
     currentConfig.smoothing = value -- Updates the configuration
     saveConfig(currentConfig) -- Saves the configuration
@@ -313,11 +358,11 @@ local instructionTextContent = "READ before using the script:\nEach time you sta
 local instructionNote = Instance.new("TextLabel", frame) -- Label to display instructions
 instructionNote.Name = "InstructionNote"
 instructionNote.Size = UDim2.new(0.9, 0, 0, 110)
-instructionNote.Position = UDim2.new(0.05, 0, 0, instructionLabelYPosition)
+instructionNote.Position = UDim2.new(0.05, 0, 0, 340)
 instructionNote.BackgroundTransparency = 1
 instructionNote.TextColor3 = Color3.fromRGB(230, 230, 230)
 instructionNote.Font = Enum.Font.Gotham
-instructionNote.TextSize = 13
+instructionNote.TextSize = 12
 instructionNote.TextWrapped = true -- Allows text to wrap to multiple lines
 instructionNote.TextXAlignment = Enum.TextXAlignment.Left
 instructionNote.TextYAlignment = Enum.TextYAlignment.Top
