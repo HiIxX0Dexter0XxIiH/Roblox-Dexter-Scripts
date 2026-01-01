@@ -30,6 +30,7 @@ This mode is designed for Player vs. Player combat scenarios.
 * 👁️‍🗨️ Wall Hack
 * ⭕ FOV (Field of View)
 * 💨 Smooth Adjustment
+* 🚫 Anti Recoil
 * 💾 Save and Load Configuration
 * 🎨 Enhanced GUI (Draggable, Toggleable with 'Insert' key)
 
