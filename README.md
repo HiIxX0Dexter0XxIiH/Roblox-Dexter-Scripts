@@ -46,6 +46,7 @@ This mode is tailored for Player vs. Environment gameplay.
 * 🤫 Silent Aim
 * 🚫 Anti Recoil
 * 🔫 All Firemodes
+* 🔅 FullBright
 
 ---
 
