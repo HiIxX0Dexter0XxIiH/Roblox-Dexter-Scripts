@@ -1,57 +1,87 @@
+# Roblox-Dexter-Scripts
+
 ## ⚠️ Disclaimer: User Responsibility & Ban Warning ⚠️
 
-**Please read this carefully before using the script:**
+**Use this at your own risk.**
 
-I am **NOT** responsible for any bans, account suspensions, or any other penalties you may receive on Roblox or any other game as a result of using this script. The use of third-party scripts often violates Terms of Service and can lead to disciplinary action by game developers.
-
-During my own testing phase, I personally received a **Roblox ban** after a few days of using this script.
-
-**🛑 USE THIS SCRIPT ENTIRELY AT YOUR OWN RISK! 🛑**
-You are solely responsible for the consequences of your actions.
+I am not responsible for bans, account suspensions, or any penalties you may receive for using third-party scripts in Roblox. These scripts may violate the Roblox Terms of Service.
 
 ---
 
-Script:
+## 🚀 How to use
+
+1. Open your Roblox script executor.
+2. Paste this command:
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/refs/heads/main/loader.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/main/loader.lua"))()
 ```
-Select your gamemode and the script load. 
+
+3. Select your mode (PVP/PVE) in the in-game GUI.
+
+> If you are already in a supported place, the script will auto-detect and load the correct mode using `game.PlaceId`.
 
 ---
 
-## ⚔️ PVP Mode Features ⚔️
+## 🔧 Main features in this repo
 
-This mode is designed for Player vs. Player combat scenarios.
+### `loader.lua`
+- Detects `PlaceId` and loads corresponding mode (PVP/PVE).
+- If unsupported place, shows GUI to manually choose mode.
+- Loads remote mode scripts from this repo.
 
-### Current Options:
+### `brm5-pvp/main.lua`
+- Loads modules from `brm5-pvp/modules`.
+- Handles config, GUI, aim, fullbright, wallhack, no recoil, config save/load.
 
-* 🎯 Aimbot
-* 👁️‍🗨️ Wall Hack
-* ⭕ FOV (Field of View)
-* 💨 Smooth Adjustment
-* 🚫 Anti Recoil
-* 💾 Save and Load Configuration
-* 🎨 Enhanced GUI (Draggable, Toggleable with 'Insert' key)
-
----
-
-## 🤖 PVE Mode Features 🤖
-
-This mode is tailored for Player vs. Environment gameplay.
-
-### Current Options:
-
-* 👁️‍🗨️ WallHack
-* 🤫 Silent Aim
-* 🚫 Anti Recoil
-* 🔫 All Firemodes
-* 🔅 FullBright
+### `brm5-pve/main.lua`
+- Loads modules from `brm5-pve/modules`.
+- Handles config, GUI, NPC tracking, silent aim, fullbright, no recoil.
 
 ---
 
-### 🚀 Future Enhancements:
+## ✅ Updated repo changes
 
-*  🧟‍♂️Zombie Mode and others
+- Updated all remote links to use this repo (`Roblox-Dexter-Scripts`) instead of the old repo.
+- `loader.lua` now uses updated `loadPvp` and `loadPve` URLs.
+- PVP/PVE mode modules now use `GITHUB_BASE` paths for this repo.
+- README updated with the correct loader command and usage guide.
 
-Enjoy and play smart! Remember the risks.
+---
+
+## 🎮 Mode details
+
+### ⚔️ PVP mode
+- Aimbot
+- Wallhack
+- FOV
+- Smooth
+- Anti-recoil
+- Config save/load
+- Improved GUI
+
+### 🤖 PVE mode
+- Wallhack/markers
+- Silent aim / target sizing
+- Anti-recoil
+- All firemodes
+- Fullbright
+
+---
+
+## 📌 Quick tuning
+
+Adjust `PVP_PLACE_IDS` and `PVE_PLACE_IDS` in `loader.lua` for your supported game places.
+
+---
+
+## 📁 Repo structure
+
+- `loader.lua`
+- `README.md`
+- `brm5-pvp/main.lua`
+- `brm5-pve/main.lua`
+- `brm5-pvp/modules/`
+- `brm5-pve/modules/`
+
+

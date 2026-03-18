@@ -1,5 +1,42 @@
--- Variables
 local player = game.Players.LocalPlayer
+local placeId = game.PlaceId
+
+local PVP_PLACE_IDS = {
+    [5289429734] = true,
+    [5480112241] = true,
+    [4524359706] = true,
+    [5468388011] = true,
+    [3826587512] = true
+}
+
+local PVE_PLACE_IDS = {
+    [3701546109] = true
+}
+
+local function loadRemoteScript(url)
+    task.spawn(function()
+        loadstring(game:HttpGet(url .. "?v=" .. tostring(os.time())))()
+    end)
+end
+
+local function loadPvp()
+    loadRemoteScript("https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/main/brm5-pvp/main.lua")
+end
+
+local function loadPve()
+    loadRemoteScript("https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/main/brm5-pve/main.lua")
+end
+
+if PVP_PLACE_IDS[placeId] then
+    loadPvp()
+    return
+end
+
+if PVE_PLACE_IDS[placeId] then
+    loadPve()
+    return
+end
+
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "ModeSelectionGUI"
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -53,52 +90,26 @@ local function createButton(name, text, color, posY)
     return button
 end
 
--- Create buttons
 local pvpButton = createButton("PVPButton", "PVP", Color3.fromRGB(200, 60, 60), 60)
 local pveButton = createButton("PVEButton", "PVE", Color3.fromRGB(60, 200, 60), 115)
 
--- Ensure character is loaded
-local function getSafeCharacter()
-    local character = player.Character
-    if not character or not character.Parent then
-        character = player.CharacterAdded:Wait()
-    end
-    return character
-end
-
--- Mode selection functions
-local function onPvpSelected()
-    -- Deshabilitar botones inmediatamente
+local function setLoadingState(pvpText, pveText)
     pvpButton.AutoButtonColor = false
     pveButton.AutoButtonColor = false
-    pvpButton.Text = "Loading..."
-    pveButton.Text = "Please wait..."
-
-    -- Destruir GUI antes de cargar el script
+    pvpButton.Text = pvpText
+    pveButton.Text = pveText
     screenGui:Destroy()
+end
 
-    -- Ejecutar script en segundo plano
-    task.spawn(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/refs/heads/main/BRM5-PVP.lua"))()
-    end)
+local function onPvpSelected()
+    setLoadingState("Loading...", "Please wait...")
+    loadPvp()
 end
 
 local function onPveSelected()
-    -- Deshabilitar botones inmediatamente
-    pvpButton.AutoButtonColor = false
-    pveButton.AutoButtonColor = false
-    pvpButton.Text = "Please wait..."
-    pveButton.Text = "Loading..."
-
-    -- Destruir GUI antes de cargar el script
-    screenGui:Destroy()
-
-    -- Ejecutar script en segundo plano
-    task.spawn(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/refs/heads/main/BRM5-PVE.lua"))()
-    end)
+    setLoadingState("Please wait...", "Loading...")
+    loadPve()
 end
 
--- Connect buttons
 pvpButton.MouseButton1Click:Connect(onPvpSelected)
 pveButton.MouseButton1Click:Connect(onPveSelected)
