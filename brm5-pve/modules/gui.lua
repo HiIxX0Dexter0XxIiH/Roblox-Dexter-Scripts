@@ -7,6 +7,7 @@ GUI.screenGui = nil
 GUI.mainFrame = nil
 GUI.modalOverlay = nil
 GUI.cursorIndicator = nil
+GUI.toggleButton = nil
 GUI.tabButtons = {}
 GUI.tabs = {}
 
@@ -74,6 +75,12 @@ local function createInfoLabel(parent, text)
     lbl.TextYAlignment = "Top"
     lbl.BackgroundTransparency = 1
     return lbl
+end
+
+local function updateToggleButtonText(button, isVisible)
+    if button then
+        button.Text = isVisible and "Hide GUI" or "Open GUI"
+    end
 end
 
 -- Creates a slider
@@ -171,6 +178,28 @@ function GUI:init(services, config, callbacks)
     local cursorStroke = Instance.new("UIStroke", cursorIndicator)
     cursorStroke.Color = Color3.fromRGB(0, 0, 0)
     cursorStroke.Thickness = 1.5
+
+    local toggleButton = Instance.new("TextButton", self.screenGui)
+    toggleButton.Name = "GuiToggleButton"
+    toggleButton.Size = UDim2.fromOffset(110, 36)
+    toggleButton.Position = UDim2.new(0, 20, 0.5, -18)
+    toggleButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    toggleButton.BorderSizePixel = 0
+    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggleButton.Font = "GothamBold"
+    toggleButton.TextSize = 13
+    toggleButton.ZIndex = 101
+    Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0, 8)
+    self.toggleButton = toggleButton
+    updateToggleButtonText(toggleButton, config.guiVisible)
+
+    toggleButton.MouseButton1Click:Connect(function()
+        if callbacks.onVisibilityToggle then
+            callbacks.onVisibilityToggle()
+        else
+            self:toggleVisibility()
+        end
+    end)
 
     -- Main Window Frame
     local main = Instance.new("Frame", self.screenGui)
@@ -429,17 +458,24 @@ function GUI:init(services, config, callbacks)
     unl.MouseButton1Click:Connect(callbacks.onUnload)
 end
 
+function GUI:setVisibleState(isVisible)
+    if self.mainFrame then
+        self.mainFrame.Visible = isVisible
+    end
+    if self.modalOverlay then
+        self.modalOverlay.Visible = isVisible
+    end
+    if self.cursorIndicator then
+        self.cursorIndicator.Visible = isVisible
+    end
+    updateToggleButtonText(self.toggleButton, isVisible)
+    return isVisible
+end
+
 -- Toggle GUI visibility
 function GUI:toggleVisibility()
     if self.mainFrame then
-        self.mainFrame.Visible = not self.mainFrame.Visible
-        if self.modalOverlay then
-            self.modalOverlay.Visible = self.mainFrame.Visible
-        end
-        if self.cursorIndicator then
-            self.cursorIndicator.Visible = self.mainFrame.Visible
-        end
-        return self.mainFrame.Visible
+        return self:setVisibleState(not self.mainFrame.Visible)
     end
     return false
 end
@@ -453,6 +489,7 @@ function GUI:destroy()
     self.mainFrame = nil
     self.modalOverlay = nil
     self.cursorIndicator = nil
+    self.toggleButton = nil
 end
 
 return GUI

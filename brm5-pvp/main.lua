@@ -66,6 +66,17 @@ local function forceMouseLock()
     Services.UserInputService.MouseIconEnabled = false
 end
 
+local function toggleGUIVisibility()
+    local wasVisible = Config.guiVisible
+    Config.guiVisible = GUI:toggleVisibility()
+    if Config.guiVisible then
+        syncMouseState()
+    elseif wasVisible then
+        forceMouseLock()
+    end
+    return Config.guiVisible
+end
+
 local function disconnectRuntimeConnections()
     for _, connection in ipairs(runtimeConnections) do
         pcall(function()
@@ -159,6 +170,10 @@ local callbacks = {
         AllyScan:start(Config.ALLY_SCAN_DURATION, Services, Walls, Config)
     end,
 
+    onVisibilityToggle = function()
+        toggleGUIVisibility()
+    end,
+
     onUnload = function()
         if Config.isUnloaded then
             return
@@ -233,13 +248,7 @@ table.insert(runtimeConnections, Services.UserInputService.InputBegan:Connect(fu
     end
 
     if not gameProcessed and input.KeyCode == Enum.KeyCode.Insert then
-        local wasVisible = Config.guiVisible
-        Config.guiVisible = GUI:toggleVisibility()
-        if Config.guiVisible then
-            syncMouseState()
-        elseif wasVisible then
-            forceMouseLock()
-        end
+        toggleGUIVisibility()
         return
     end
 
