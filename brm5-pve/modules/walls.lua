@@ -4,6 +4,19 @@ local Markers = {}
 Markers.trackedParts = {} -- List of body parts we are watching
 Markers.enabled = false
 Markers.boxTransparency = 0.3
+Markers._updateCursor = 1
+
+local function hasBallSocketConstraint(model)
+    return model and model:FindFirstChildWhichIsA("BallSocketConstraint", true) ~= nil
+end
+
+local function collectActiveNPCModels(npcManager)
+    local models = {}
+    for model, _ in pairs(npcManager:getActiveNPCs()) do
+        table.insert(models, model)
+    end
+    return models
+end
 
 local function ensureBox(part, color)
     local box = part:FindFirstChild("Marker_Box")
@@ -73,27 +86,46 @@ function Markers.updateColors(npcManager, camera, workspace, localPlayer, config
         character = camera.CameraSubject:FindFirstAncestorOfClass("Model")
     end
 
-    local processed = 0
     local maxPerStep = config.MARKER_MAX_PER_STEP or 12
     local origin = camera.CFrame.Position
     local rp = RaycastParams.new()
     rp.FilterType = Enum.RaycastFilterType.Blacklist
     rp.FilterDescendantsInstances = character and {character} or {}
 
-    for model, data in pairs(npcManager:getActiveNPCs()) do
-        if processed >= maxPerStep then
-            break
-        end
-        if data.head and data.head:FindFirstChild("Marker_Box") then
-            local result = workspace:Raycast(origin, data.head.Position - origin, rp)
-            local isVisible = (not result or result.Instance:IsDescendantOf(model))
-            data.head.Marker_Box.Color3 = isVisible
-                and config.visibleColor
-                or config.hiddenColor
-            data.head.Marker_Box.Transparency = Markers.boxTransparency
-            processed = processed + 1
+    local models = collectActiveNPCModels(npcManager)
+    local total = #models
+    if total == 0 then
+        Markers._updateCursor = 1
+        return
+    end
+
+    local toProcess = math.min(maxPerStep, total)
+    local startIndex = Markers._updateCursor
+    if startIndex < 1 or startIndex > total then
+        startIndex = 1
+    end
+
+    for offset = 0, toProcess - 1 do
+        local index = ((startIndex - 1 + offset) % total) + 1
+        local model = models[index]
+        local data = npcManager:getActiveNPCs()[model]
+
+        if data and data.head and data.head.Parent then
+            if hasBallSocketConstraint(model) then
+                Markers.destroyBoxForPart(data.head)
+            else
+                local box = data.head:FindFirstChild("Marker_Box")
+                if box then
+                    local result = workspace:Raycast(origin, data.head.Position - origin, rp)
+                    local isVisible = (not result or result.Instance:IsDescendantOf(model))
+                    box.Color3 = isVisible and config.visibleColor or config.hiddenColor
+                    box.Transparency = Markers.boxTransparency
+                end
+            end
         end
     end
+
+    Markers._updateCursor = ((startIndex - 1 + toProcess) % total) + 1
 end
 
 -- Enables visibility markers
