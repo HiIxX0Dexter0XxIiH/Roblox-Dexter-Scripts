@@ -7,7 +7,7 @@ if typeof(clear) == "function" then
 end
 
 local MAIN_VERSION = "cache-bust-2026-03-18-01"
-local GITHUB_BASE = "https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/main/brm5-pve/modules/"
+local GITHUB_BASE = "https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/developer/brm5-pve/modules/"
 local CACHE_BUSTER = MAIN_VERSION .. "-" .. tostring(os.time())
 
 local function loadModule(moduleName)

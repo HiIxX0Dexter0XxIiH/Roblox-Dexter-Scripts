@@ -1,5 +1,6 @@
 local player = game.Players.LocalPlayer
 local placeId = game.PlaceId
+local BRANCH = "developer"
 
 local PVP_PLACE_IDS = {
     [5289429734] = true,
@@ -20,11 +21,11 @@ local function loadRemoteScript(url)
 end
 
 local function loadPvp()
-    loadRemoteScript("https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/main/brm5-pvp/main.lua")
+    loadRemoteScript("https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/" .. BRANCH .. "/brm5-pvp/main.lua")
 end
 
 local function loadPve()
-    loadRemoteScript("https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/main/brm5-pve/main.lua")
+    loadRemoteScript("https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/" .. BRANCH .. "/brm5-pve/main.lua")
 end
 
 if PVP_PLACE_IDS[placeId] then
