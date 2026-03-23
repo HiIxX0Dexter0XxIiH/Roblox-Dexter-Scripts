@@ -9,6 +9,16 @@ NPCManager.activeNPCs = {}      -- List of enemies currently in the game
 NPCManager.wallConnections = {} -- List of connections to clean up later
 NPCManager.modelConnections = {} -- Per-model connections for delayed NPC detection
 
+local function disconnectModelConnection(self, container)
+    local connection = self.modelConnections[container]
+    if connection then
+        pcall(function()
+            connection:Disconnect()
+        end)
+        self.modelConnections[container] = nil
+    end
+end
+
 -- Finds the main part of a character (Root)
 function NPCManager.getRootPart(model)
     return model:FindFirstChild("Root") or 
@@ -108,6 +118,7 @@ function NPCManager:addNPC(container, workspace, markerModule, config)
         return
     end
 
+    disconnectModelConnection(self, container)
     for _, npc in ipairs(npcs) do
         self:addNPCModel(npc, container, markerModule, config)
     end
@@ -198,6 +209,12 @@ function NPCManager:refreshTrackedNPCs(workspace, markerModule, targetSizing, co
         self:removeNPCModel(model, markerModule, targetSizing)
     end
 
+    for container in pairs(self.modelConnections) do
+        if not container or not container.Parent then
+            disconnectModelConnection(self, container)
+        end
+    end
+
     for _, container in ipairs(workspace:GetChildren()) do
         if container:IsA("Model") and container.Name == "Model" then
             self:trackPotentialNPC(container, workspace, markerModule, config)
@@ -233,8 +250,8 @@ function NPCManager:cleanup()
         pcall(function() c:Disconnect() end) 
     end
     self.wallConnections = {}
-    for _, c in pairs(self.modelConnections) do
-        pcall(function() c:Disconnect() end)
+    for container in pairs(self.modelConnections) do
+        disconnectModelConnection(self, container)
     end
     self.modelConnections = {}
     self.activeNPCs = {}

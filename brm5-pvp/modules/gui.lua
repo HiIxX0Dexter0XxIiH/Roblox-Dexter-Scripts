@@ -7,6 +7,12 @@ GUI.cursorIndicator = nil
 GUI.toggleButton = nil
 GUI.tabButtons = {}
 GUI.tabs = {}
+GUI.connections = {}
+
+local function trackConnection(gui, connection)
+    table.insert(gui.connections, connection)
+    return connection
+end
 
 local function createTab(container)
     local frame = Instance.new("ScrollingFrame", container)
@@ -93,7 +99,7 @@ local function createInfoLabel(parent, text, height)
     return label
 end
 
-local function createSlider(parent, label, initialValue, maxValue, callback, layoutIndex, services)
+local function createSlider(parent, label, initialValue, maxValue, callback, layoutIndex, services, gui)
     local frame = Instance.new("Frame", parent)
     frame.Size = UDim2.new(1, -10, 0, 50)
     frame.BackgroundTransparency = 1
@@ -135,17 +141,17 @@ local function createSlider(parent, label, initialValue, maxValue, callback, lay
         end
     end)
 
-    services.UserInputService.InputEnded:Connect(function(input)
+    trackConnection(gui, services.UserInputService.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
         end
-    end)
+    end))
 
-    services.RunService.RenderStepped:Connect(function()
+    trackConnection(gui, services.RunService.RenderStepped:Connect(function()
         if dragging then
             update()
         end
-    end)
+    end))
 end
 
 function GUI:init(services, config, callbacks)
@@ -253,7 +259,7 @@ function GUI:init(services, config, callbacks)
         end
     end)
 
-    services.RunService.RenderStepped:Connect(function()
+    trackConnection(self, services.RunService.RenderStepped:Connect(function()
         if dragging and dragInput then
             updateDrag(dragInput)
         end
@@ -261,7 +267,7 @@ function GUI:init(services, config, callbacks)
         if self.cursorIndicator then
             self.cursorIndicator.Position = UDim2.fromOffset(playerMouse.X, playerMouse.Y)
         end
-    end)
+    end))
 
     local title = Instance.new("TextLabel", topBar)
     title.Size = UDim2.new(1, -20, 1, 0)
@@ -345,8 +351,8 @@ function GUI:init(services, config, callbacks)
     -- main.lua so game logic stays outside the UI layer.
     createToggleButton(tabCombat, "Aim", config.aimEnabled, callbacks.onAimToggle)
     createToggleButton(tabCombat, "FOV", config.fovEnabled, callbacks.onFOVToggle)
-    createSlider(tabCombat, "FOV Radius", config.fovRadius, config.MAX_FOV_RADIUS, callbacks.onFOVRadiusChange, nil, services)
-    createSlider(tabCombat, "Smoothing", config.smoothing, config.MAX_SMOOTHING, callbacks.onSmoothingChange, nil, services)
+    createSlider(tabCombat, "FOV Radius", config.fovRadius, config.MAX_FOV_RADIUS, callbacks.onFOVRadiusChange, nil, services, self)
+    createSlider(tabCombat, "Smoothing", config.smoothing, config.MAX_SMOOTHING, callbacks.onSmoothingChange, nil, services, self)
     createActionButton(tabCombat, "Scan Allies (3s)", Color3.fromRGB(65, 125, 85), callbacks.onScanAllies)
     createInfoLabel(
         tabCombat,
@@ -369,20 +375,20 @@ function GUI:init(services, config, callbacks)
     local layoutIndex = 1
     createLabel(tabColors, "-- VISIBLE COLOR --", Color3.new(0.5, 1, 0.5), 24, layoutIndex)
     layoutIndex = layoutIndex + 1
-    createSlider(tabColors, "R", config.visibleR, 255, callbacks.onVisibleRChange, layoutIndex, services)
+    createSlider(tabColors, "R", config.visibleR, 255, callbacks.onVisibleRChange, layoutIndex, services, self)
     layoutIndex = layoutIndex + 1
-    createSlider(tabColors, "G", config.visibleG, 255, callbacks.onVisibleGChange, layoutIndex, services)
+    createSlider(tabColors, "G", config.visibleG, 255, callbacks.onVisibleGChange, layoutIndex, services, self)
     layoutIndex = layoutIndex + 1
-    createSlider(tabColors, "B", config.visibleB, 255, callbacks.onVisibleBChange, layoutIndex, services)
+    createSlider(tabColors, "B", config.visibleB, 255, callbacks.onVisibleBChange, layoutIndex, services, self)
     layoutIndex = layoutIndex + 1
 
     createLabel(tabColors, "-- HIDDEN COLOR --", Color3.new(1, 0.5, 0.5), 24, layoutIndex)
     layoutIndex = layoutIndex + 1
-    createSlider(tabColors, "R", config.hiddenR, 255, callbacks.onHiddenRChange, layoutIndex, services)
+    createSlider(tabColors, "R", config.hiddenR, 255, callbacks.onHiddenRChange, layoutIndex, services, self)
     layoutIndex = layoutIndex + 1
-    createSlider(tabColors, "G", config.hiddenG, 255, callbacks.onHiddenGChange, layoutIndex, services)
+    createSlider(tabColors, "G", config.hiddenG, 255, callbacks.onHiddenGChange, layoutIndex, services, self)
     layoutIndex = layoutIndex + 1
-    createSlider(tabColors, "B", config.hiddenB, 255, callbacks.onHiddenBChange, layoutIndex, services)
+    createSlider(tabColors, "B", config.hiddenB, 255, callbacks.onHiddenBChange, layoutIndex, services, self)
 
     local function addCredit(text, font, size)
         local label = Instance.new("TextLabel", tabCredits)
@@ -472,6 +478,13 @@ function GUI:toggleVisibility()
 end
 
 function GUI:destroy()
+    for _, connection in ipairs(self.connections) do
+        pcall(function()
+            connection:Disconnect()
+        end)
+    end
+    self.connections = {}
+
     if self.screenGui then
         self.screenGui:Destroy()
     end

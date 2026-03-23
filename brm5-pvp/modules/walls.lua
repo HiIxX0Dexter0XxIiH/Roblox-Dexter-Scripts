@@ -1,10 +1,22 @@
 local Walls = {
     trackedHeads = {},
-    connections = {}
+    trackedModels = {},
+    connections = {},
+    pendingModelConnections = {}
 }
 
 local function isTargetModel(instance, config)
     return instance and instance:IsA("Model") and instance.Name == config.TARGET_NAME
+end
+
+local function disconnectPendingConnection(self, model)
+    local connection = self.pendingModelConnections[model]
+    if connection then
+        pcall(function()
+            connection:Disconnect()
+        end)
+        self.pendingModelConnections[model] = nil
+    end
 end
 
 -- Heads are the canonical tracked parts for both ESP coloring and aim target
@@ -31,6 +43,24 @@ function Walls:untrackHead(head)
     if box then
         box:Destroy()
     end
+end
+
+function Walls:watchModelForHead(model, config)
+    if not isTargetModel(model, config) or self.pendingModelConnections[model] then
+        return
+    end
+
+    self.pendingModelConnections[model] = model.ChildAdded:Connect(function(child)
+        if config.isUnloaded then
+            disconnectPendingConnection(self, model)
+            return
+        end
+
+        if child.Name == config.TARGET_PART and child:IsA("BasePart") then
+            self:registerModel(model, config)
+            disconnectPendingConnection(self, model)
+        end
+    end)
 end
 
 function Walls:createBoxForHead(head, config)
@@ -66,11 +96,14 @@ function Walls:registerModel(model, config)
         return
     end
 
+    self.trackedModels[model] = true
     local head = model:FindFirstChild(config.TARGET_PART)
     if not head or not head:IsA("BasePart") then
+        self:watchModelForHead(model, config)
         return
     end
 
+    disconnectPendingConnection(self, model)
     self.trackedHeads[head] = true
     self:createBoxForHead(head, config)
 end
@@ -89,14 +122,19 @@ function Walls:setupListener(workspace, config)
             return
         end
 
-        -- Newly spawned models often arrive before their Head exists, so a
-        -- short delay makes registration much more reliable.
-        task.delay(0.5, function()
-            if config.isUnloaded then
-                return
-            end
-            self:registerModel(instance, config)
-        end)
+        self:registerModel(instance, config)
+    end))
+
+    table.insert(self.connections, workspace.DescendantRemoving:Connect(function(instance)
+        if instance and instance:IsA("BasePart") and self.trackedHeads[instance] then
+            self:untrackHead(instance)
+            return
+        end
+
+        if instance and instance:IsA("Model") and self.trackedModels[instance] then
+            disconnectPendingConnection(self, instance)
+            self.trackedModels[instance] = nil
+        end
     end))
 end
 
@@ -166,6 +204,10 @@ function Walls:cleanup()
         end)
     end
     self.connections = {}
+    for model in pairs(self.pendingModelConnections) do
+        disconnectPendingConnection(self, model)
+    end
+    self.trackedModels = {}
     self:destroyAllBoxes()
 end
 

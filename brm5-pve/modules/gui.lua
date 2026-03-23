@@ -10,6 +10,12 @@ GUI.cursorIndicator = nil
 GUI.toggleButton = nil
 GUI.tabButtons = {}
 GUI.tabs = {}
+GUI.connections = {}
+
+local function trackConnection(gui, connection)
+    table.insert(gui.connections, connection)
+    return connection
+end
 
 -- Creates a new tab page
 local function createTab(container)
@@ -84,7 +90,7 @@ local function updateToggleButtonText(button, isVisible)
 end
 
 -- Creates a slider
-local function createSlider(parent, label, initialValue, maxValue, callback, layoutIndex, services)
+local function createSlider(parent, label, initialValue, maxValue, callback, layoutIndex, services, gui)
     local f = Instance.new("Frame", parent)
     f.Size = UDim2.new(1, -10, 0, 50)
     f.BackgroundTransparency = 1
@@ -125,17 +131,17 @@ local function createSlider(parent, label, initialValue, maxValue, callback, lay
         end 
     end)
     
-    services.UserInputService.InputEnded:Connect(function(input) 
+    trackConnection(gui, services.UserInputService.InputEnded:Connect(function(input) 
         if input.UserInputType == Enum.UserInputType.MouseButton1 then 
             dragging = false 
         end 
-    end)
+    end))
     
-    services.RunService.RenderStepped:Connect(function() 
+    trackConnection(gui, services.RunService.RenderStepped:Connect(function() 
         if dragging then 
             update() 
         end 
-    end)
+    end))
 end
 
 -- Initialize the GUI
@@ -246,7 +252,7 @@ function GUI:init(services, config, callbacks)
         end
     end)
 
-    services.RunService.RenderStepped:Connect(function()
+    trackConnection(self, services.RunService.RenderStepped:Connect(function()
         if dragging and dragInput then 
             updateDrag(dragInput) 
         end
@@ -257,7 +263,7 @@ function GUI:init(services, config, callbacks)
                 playerMouse.Y
             )
         end
-    end)
+    end))
 
     -- Title
     local title = Instance.new("TextLabel", topBar)
@@ -355,7 +361,8 @@ function GUI:init(services, config, callbacks)
         config.MAX_NPC_DETECTION_RADIUS,
         callbacks.onNPCDetectionRadiusChange,
         nil,
-        services
+        services,
+        self
     )
     createInfoLabel(
         tabVisuals,
@@ -373,21 +380,21 @@ function GUI:init(services, config, callbacks)
     createLabel(tabColors, "-- VISIBLE COLOR --", Color3.new(0.5, 1, 0.5), layoutIndex)
     layoutIndex = layoutIndex + 1
     
-    createSlider(tabColors, "R", config.visibleR, 255, callbacks.onVisibleRChange, layoutIndex, services)
+    createSlider(tabColors, "R", config.visibleR, 255, callbacks.onVisibleRChange, layoutIndex, services, self)
     layoutIndex = layoutIndex + 1
-    createSlider(tabColors, "G", config.visibleG, 255, callbacks.onVisibleGChange, layoutIndex, services)
+    createSlider(tabColors, "G", config.visibleG, 255, callbacks.onVisibleGChange, layoutIndex, services, self)
     layoutIndex = layoutIndex + 1
-    createSlider(tabColors, "B", config.visibleB, 255, callbacks.onVisibleBChange, layoutIndex, services)
+    createSlider(tabColors, "B", config.visibleB, 255, callbacks.onVisibleBChange, layoutIndex, services, self)
     layoutIndex = layoutIndex + 1
 
     createLabel(tabColors, "-- HIDDEN COLOR --", Color3.new(1, 0.5, 0.5), layoutIndex)
     layoutIndex = layoutIndex + 1
     
-    createSlider(tabColors, "R", config.hiddenR, 255, callbacks.onHiddenRChange, layoutIndex, services)
+    createSlider(tabColors, "R", config.hiddenR, 255, callbacks.onHiddenRChange, layoutIndex, services, self)
     layoutIndex = layoutIndex + 1
-    createSlider(tabColors, "G", config.hiddenG, 255, callbacks.onHiddenGChange, layoutIndex, services)
+    createSlider(tabColors, "G", config.hiddenG, 255, callbacks.onHiddenGChange, layoutIndex, services, self)
     layoutIndex = layoutIndex + 1
-    createSlider(tabColors, "B", config.hiddenB, 255, callbacks.onHiddenBChange, layoutIndex, services)
+    createSlider(tabColors, "B", config.hiddenB, 255, callbacks.onHiddenBChange, layoutIndex, services, self)
 
     -- CREDITS TAB
     local function addCredit(text, font, size)
@@ -482,6 +489,13 @@ end
 
 -- Destroy GUI
 function GUI:destroy()
+    for _, connection in ipairs(self.connections) do
+        pcall(function()
+            connection:Disconnect()
+        end)
+    end
+    self.connections = {}
+
     if self.screenGui then
         self.screenGui:Destroy()
     end
@@ -490,6 +504,8 @@ function GUI:destroy()
     self.modalOverlay = nil
     self.cursorIndicator = nil
     self.toggleButton = nil
+    self.tabButtons = {}
+    self.tabs = {}
 end
 
 return GUI

@@ -3,7 +3,8 @@ local AllyScan = {
     connection = nil,
     monitorConnection = nil,
     handledRoundModel = nil,
-    monitorAccumulator = 0
+    monitorAccumulator = 0,
+    scanAccumulator = 0
 }
 
 -- The round monitor watches the first-person WorldModel so ally scanning can
@@ -32,9 +33,10 @@ function AllyScan:start(duration, services, walls, config)
     end
 
     self.active = true
+    self.scanAccumulator = 0
     local startedAt = tick()
 
-    self.connection = services.RunService.Heartbeat:Connect(function()
+    self.connection = services.RunService.Heartbeat:Connect(function(dt)
         if config.isUnloaded then
             self:stop()
             return
@@ -45,12 +47,18 @@ function AllyScan:start(duration, services, walls, config)
             return
         end
 
+        self.scanAccumulator = self.scanAccumulator + (dt or 0)
+        if self.scanAccumulator < 0.1 then
+            return
+        end
+        self.scanAccumulator = 0
+
         -- Allies are inferred from currently visible targets during the short
         -- scan window, then renamed so the wall tracker ignores them.
-        for _, model in ipairs(services.Workspace:GetDescendants()) do
-            if model:IsA("Model") and model.Name == config.TARGET_NAME then
-                local head = model:FindFirstChild(config.TARGET_PART)
-                local box = head and head:FindFirstChild(config.REQUIRED_CHILD)
+        for head in pairs(walls.trackedHeads) do
+            local model = head and head.Parent
+            local box = head and head:FindFirstChild(config.REQUIRED_CHILD)
+            if model and model.Name == config.TARGET_NAME then
                 if box and box:IsA("BoxHandleAdornment") and box.Color3 == config.visibleColor then
                     walls:untrackHead(head)
                     model.Name = "Team"
@@ -127,6 +135,7 @@ end
 
 function AllyScan:stop()
     self.active = false
+    self.scanAccumulator = 0
     if self.connection then
         pcall(function()
             self.connection:Disconnect()

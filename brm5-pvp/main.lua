@@ -205,7 +205,6 @@ if Config.patchOptions.recoil or Config.patchOptions.firemodes then
     NoRecoil.patchWeapons(Services.ReplicatedStorage, Config.patchOptions)
 end
 
-local targetAccumulator = 0
 local colorAccumulator = 0
 
 -- Heartbeat drives the lower-frequency maintenance work so we avoid
@@ -220,12 +219,6 @@ table.insert(runtimeConnections, Services.RunService.Heartbeat:Connect(function(
     end
 
     Lighting:update(Services.Lighting, Config)
-
-    targetAccumulator = targetAccumulator + dt
-    if targetAccumulator >= Config.TARGET_REFRESH_INTERVAL then
-        Walls:refreshTrackedTargets(Services.Workspace, Config)
-        targetAccumulator = 0
-    end
 
     colorAccumulator = colorAccumulator + dt
     if colorAccumulator >= Config.COLOR_UPDATE_INTERVAL then

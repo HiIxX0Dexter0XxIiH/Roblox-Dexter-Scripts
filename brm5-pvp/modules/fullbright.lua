@@ -33,7 +33,9 @@ end
 
 function Lighting:update(lightingService, config)
     if config.fullBrightEnabled then
-        self:applyFullBright(lightingService)
+        if not self.fullBrightApplied then
+            self:applyFullBright(lightingService)
+        end
         return
     end
 

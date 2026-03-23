@@ -76,16 +76,15 @@ function Markers.updateColors(npcManager, camera, workspace, localPlayer, config
     local processed = 0
     local maxPerStep = config.MARKER_MAX_PER_STEP or 12
     local origin = camera.CFrame.Position
+    local rp = RaycastParams.new()
+    rp.FilterType = Enum.RaycastFilterType.Blacklist
+    rp.FilterDescendantsInstances = character and {character} or {}
 
     for model, data in pairs(npcManager:getActiveNPCs()) do
         if processed >= maxPerStep then
             break
         end
         if data.head and data.head:FindFirstChild("Marker_Box") then
-            local rp = RaycastParams.new()
-            rp.FilterType = Enum.RaycastFilterType.Blacklist
-            rp.FilterDescendantsInstances = character and {character, data.head} or {data.head}
-
             local result = workspace:Raycast(origin, data.head.Position - origin, rp)
             local isVisible = (not result or result.Instance:IsDescendantOf(model))
             data.head.Marker_Box.Color3 = isVisible
