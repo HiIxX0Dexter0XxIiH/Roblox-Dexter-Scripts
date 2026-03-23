@@ -1,6 +1,21 @@
 local player = game.Players.LocalPlayer
 local placeId = game.PlaceId
-local BRANCH = "developer"
+
+local function resolveBranch()
+    local env = _G
+    if typeof(getgenv) == "function" then
+        env = getgenv()
+    end
+
+    local branch = env and env.BRM5_BRANCH
+    if type(branch) == "string" and branch ~= "" then
+        return branch
+    end
+
+    return "main"
+end
+
+local BRANCH = resolveBranch()
 
 local PVP_PLACE_IDS = {
     [5289429734] = true,

@@ -6,8 +6,22 @@ if typeof(clear) == "function" then
     clear()
 end
 
+local function resolveBranch()
+    local env = _G
+    if typeof(getgenv) == "function" then
+        env = getgenv()
+    end
+
+    local branch = env and env.BRM5_BRANCH
+    if type(branch) == "string" and branch ~= "" then
+        return branch
+    end
+
+    return "main"
+end
+
 local MAIN_VERSION = "cache-bust-2026-03-18-01"
-local GITHUB_BASE = "https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/developer/brm5-pve/modules/"
+local GITHUB_BASE = "https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/" .. resolveBranch() .. "/brm5-pve/modules/"
 local CACHE_BUSTER = MAIN_VERSION .. "-" .. tostring(os.time())
 
 local function loadModule(moduleName)
