@@ -20,7 +20,7 @@ local function resolveBranch()
     return "main"
 end
 
-local MAIN_VERSION = "cache-bust-2026-03-18-01"
+local MAIN_VERSION = "cache-bust-2026-03-23-06"
 local GITHUB_BASE = "https://raw.githubusercontent.com/HiIxX0Dexter0XxIiH/Roblox-Dexter-Scripts/" .. resolveBranch() .. "/brm5-pve/modules/"
 local CACHE_BUSTER = MAIN_VERSION .. "-" .. tostring(os.time())
 
