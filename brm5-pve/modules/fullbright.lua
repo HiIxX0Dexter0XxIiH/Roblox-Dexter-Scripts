@@ -27,6 +27,24 @@ function Lighting:applyFullBright(lightingService)
     self.fullBrightApplied = true
 end
 
+function Lighting:enforceFullBright(lightingService)
+    if lightingService.Brightness ~= 2 then
+        lightingService.Brightness = 2
+    end
+    if lightingService.ClockTime ~= 12 then
+        lightingService.ClockTime = 12
+    end
+    if lightingService.FogEnd ~= 100000 then
+        lightingService.FogEnd = 100000
+    end
+    if lightingService.GlobalShadows ~= false then
+        lightingService.GlobalShadows = false
+    end
+    if lightingService.Ambient ~= Color3.new(1, 1, 1) then
+        lightingService.Ambient = Color3.new(1, 1, 1)
+    end
+end
+
 -- Restores original lighting settings
 function Lighting:restoreOriginal(lightingService)
     for property, value in pairs(self.originalLighting) do
@@ -40,6 +58,8 @@ function Lighting:update(lightingService, config)
     if config.fullBrightEnabled then
         if not self.fullBrightApplied then
             self:applyFullBright(lightingService)
+        else
+            self:enforceFullBright(lightingService)
         end
         return
     end
